@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,21 +14,23 @@ import org.springframework.web.bind.annotation.RestController;
 import de.webenm.mdbconnector.database.FileChecker;
 import de.webenm.mdbconnector.database.MDBConnector;
 
-
+@Component
 @RestController
 public class MDBConnectionController {
 
 	Map<Integer, MDBConnector> connections = new HashMap<>();
 	Map<String, Integer> connectionFiles = new HashMap<String, Integer>();
 	
+	@Autowired
 	FileChecker fileChecker;
 	
-	public MDBConnectionController() {
-		fileChecker = new FileChecker();
-	}
+	@Value("${mdbconnector.apisecret}")
+	private String apisecret;
 	
 	@PostMapping("/mdbconnect")
-	public String connect(@RequestParam(value = "file") String file, @RequestParam(value = "password") String password, @RequestParam(value = "debug", defaultValue = "false") String debugStr) {
+	public String connect(@RequestParam(value = "apisecret") String apisecret, @RequestParam(value = "file") String file, @RequestParam(value = "password") String password, @RequestParam(value = "debug", defaultValue = "false") String debugStr) {
+		this.checkPermission(apisecret);
+		
 		boolean debug = Boolean.valueOf(debugStr);
 		
 		if(debug) {
@@ -54,8 +59,9 @@ public class MDBConnectionController {
 	}
 	
 	@PostMapping("/mdbexecute")
-	public String execute(@RequestParam(value = "connID") String idStr, @RequestParam(value = "method") String method, @RequestParam(value = "sql") String sql,
+	public String execute(@RequestParam(value = "apisecret") String apisecret, @RequestParam(value = "connID") String idStr, @RequestParam(value = "method") String method, @RequestParam(value = "sql") String sql,
 			@RequestParam(value = "dict", defaultValue = "false") String dictStr) {
+		this.checkPermission(apisecret);
 		try {
 			int id = Integer.parseInt(idStr);
 			boolean dict = Boolean.valueOf(dictStr);
@@ -83,7 +89,8 @@ public class MDBConnectionController {
 	}
 	
 	@PostMapping(value = "/mdbclose", params = "connID")
-	public String close(@RequestParam(value = "connID") String idStr) {
+	public String close(@RequestParam(value = "apisecret") String apisecret, @RequestParam(value = "connID") String idStr) {
+		this.checkPermission(apisecret);
 		boolean success = false;
 		try {
 			int id = Integer.parseInt(idStr);
@@ -105,7 +112,8 @@ public class MDBConnectionController {
 	}
 	
 	@PostMapping(value = "/mdbclose", params = "file")
-	public String closeWithoutID(@RequestParam(value = "file") String file) {
+	public String closeWithoutID(@RequestParam(value = "apisecret") String apisecret, @RequestParam(value = "file") String file) {
+		this.checkPermission(apisecret);
 		boolean success = false;
 		if(this.fileChecker.checkFilename(file)) {
 			file = this.fileChecker.getFilePath(file);
@@ -126,6 +134,14 @@ public class MDBConnectionController {
 			}
 		}
 		return "{ \"success\": " + success + "}";
+	}
+	
+	public boolean checkPermission(String apisecret) {
+		if(this.apisecret.equals(apisecret)) {
+			return true;
+		} else {
+			throw new ForbiddenException();
+		}
 	}
 
 }

@@ -35,5 +35,7 @@ build/
 mvnw
 mvnw.cmd
 .mvn/
-resources/
+resources/static/
+resources/templates/
+application.properties
 test/

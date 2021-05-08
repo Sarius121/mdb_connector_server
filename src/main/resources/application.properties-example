@@ -1,0 +1,2 @@
+dbfile.directory=/full/path/where/databases/are/located/
+mdbconnector.apisecret=somesecret
