@@ -31,7 +31,7 @@ public class MDBConnector {
 	public boolean connect(String file, String password) {
 		try {
 			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-			this.conn = DriverManager.getConnection("jdbc:ucanaccess://" + file + ";jackcessOpener=de.webenm.mdbconnector.database.CryptCodecOpener", null, password);
+			this.conn = DriverManager.getConnection("jdbc:ucanaccess://" + file + ";jackcessOpener=de.webenm.mdbconnector.database.CryptCodecOpener;singleconnection=true", null, password);
 			this.file = file;
 			return true;
 		} catch (SQLException | ClassNotFoundException e) {
