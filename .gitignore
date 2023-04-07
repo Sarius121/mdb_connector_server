@@ -32,9 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-mvnw
-mvnw.cmd
-.mvn/
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/MavenWrapperDownloader.java
 resources/static/
 resources/templates/
 application.properties

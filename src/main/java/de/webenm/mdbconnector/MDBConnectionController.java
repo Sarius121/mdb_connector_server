@@ -39,6 +39,11 @@ public class MDBConnectionController {
 		
 		if(this.fileChecker.checkFilename(file)) {
 			file = this.fileChecker.getFilePath(file);
+
+			// close file if it's still open (normally that shouldn't happen)
+			if(this.connectionFiles.containsKey(file)) {
+				this.closeWithoutID(apisecret, file);
+			}
 			
 			MDBConnector mdb = new MDBConnector(debug);
 			
@@ -62,6 +67,7 @@ public class MDBConnectionController {
 	public String execute(@RequestParam(value = "apisecret") String apisecret, @RequestParam(value = "connID") String idStr, @RequestParam(value = "method") String method, @RequestParam(value = "sql") String sql,
 			@RequestParam(value = "dict", defaultValue = "false") String dictStr) {
 		this.checkPermission(apisecret);
+		
 		try {
 			int id = Integer.parseInt(idStr);
 			boolean dict = Boolean.valueOf(dictStr);
@@ -77,7 +83,6 @@ public class MDBConnectionController {
 					}
 				} else if(method.equals(MDBConnector.METHOD_EXECUTE)) {
 					boolean result = this.connections.get(id).execute(sql);
-					System.out.println(result);
 					return "{ \"success\": " + result + "}";
 				}
 			}
